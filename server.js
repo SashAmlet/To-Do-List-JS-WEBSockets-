@@ -42,6 +42,7 @@ function newConnection(socket){
     socket.on('editTask', editTask);
     function editTask(data){
         console.log('Edit task');
+        tasks.sort((a, b) => a.Order - b.Order);
         const index = tasks.findIndex(task => task.Id === data.Id);
 
         if (index !== -1) {
@@ -54,7 +55,8 @@ function newConnection(socket){
     socket.on('delete', deleteTask);
     function deleteTask(data){
         console.log('Delete task');
-        
+
+        tasks.sort((a, b) => a.Order - b.Order);
         const index = tasks.findIndex(task => task.Id === data.Id);
 
         if (index >= 0 && index < tasks.length) {

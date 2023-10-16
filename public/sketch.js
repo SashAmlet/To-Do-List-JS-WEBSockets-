@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
         form.style.width = '300px';
         form.style.margin = '0 auto';
         form.addEventListener('submit', function(event) {
-            // event.preventDefault(); // Предотвращение отправки формы
+            // event.preventDefault();
         
             if (formConfig.action === 'Create') {
                 var taskName = nameInput.value;

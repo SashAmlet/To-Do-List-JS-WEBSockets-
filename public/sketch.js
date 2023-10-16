@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var row = document.createElement('tr');
             row.className = 'draggable';
             row.draggable = true;
+            row.id = 'draggableTask' + item.Id;
     
             var orderCell = document.createElement('td');
             orderCell.textContent = item.Order;
@@ -60,9 +61,6 @@ document.addEventListener('DOMContentLoaded', function () {
     
             document.querySelector('.task-list').appendChild(row);
         });
-        // Creating an event to call DragNDrop.js
-        var myEvent = new Event('FormIsReady');
-        document.dispatchEvent(myEvent);
     }
 
     function generateForm(formConfig) {
@@ -150,12 +148,17 @@ document.addEventListener('DOMContentLoaded', function () {
         taskList.innerHTML = '';
 
         generateTaskList(tasks);
+        
+        // Creating an event to call DragNDrop.js
+        var myEvent = new Event('FormIsReady');
+        document.dispatchEvent(myEvent);
     }
 
     function updateForm(formData){
         var taskFormContainer = document.querySelector('.taskFormContainer');
         taskFormContainer.innerHTML = '';
         generateForm(formData);
+        
 
     }
     

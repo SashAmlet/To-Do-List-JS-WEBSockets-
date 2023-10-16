@@ -1,15 +1,40 @@
 document.addEventListener('FormIsReady', function () {
     const draggables = document.querySelectorAll('.draggable');
     const containers = document.querySelectorAll('.dragspace');
+    console.log('FormIsReady');
 
+    socket.on('dragstart', (data) => {
+        var draggable = document.getElementById(data.draggableId);
+        draggable.classList.add('dragging')
+        console.log('dragstart');
+    });
+
+    socket.on('dragover', (data) => {
+        var draggable = document.getElementById(data.draggableId);
+        var container = document.getElementById(data.containerId);
+        var afterElement = data.afterElementId !== null ? document.getElementById(data.afterElementId) : null;
+        if (afterElement === null) {
+            container.appendChild(draggable)
+        } else {
+            container.insertBefore(draggable, afterElement)
+        }
+        console.log('dragover');
+    });
+
+    socket.on('dragend', (data)=>{
+        var draggable = document.getElementById(data.draggableId);
+        draggable.classList.remove('dragging')
+        console.log('dragend');
+    });
+    
     draggables.forEach(draggable => {
         draggable.addEventListener('dragstart', () => {
             draggable.classList.add('dragging')
             console.log('dragstart');
-            console.log(draggable);
+            socket.emit('dragstart', {draggableId: draggable.id});
         })
     })
-    
+
     containers.forEach(container => {
         container.addEventListener('dragover', e => {
             e.preventDefault()
@@ -21,19 +46,25 @@ document.addEventListener('FormIsReady', function () {
                 container.insertBefore(draggable, afterElement)
             }
             console.log('dragover');
+            var data = {
+                draggableId: draggable.id, 
+                afterElementId: afterElement != null? afterElement.id:null, 
+                containerId: container.id
+            }
+            socket.emit('dragover', data);
             
         })
     
         container.addEventListener('dragend', e => {
             e.preventDefault();
             const draggable = document.querySelector('.dragging');
-            console.log(draggable);
             if (draggable) {
                 const id = draggable.cells[0].innerText - 1;
                 const position = getPositionInContainer(draggable, container);
                 data = {
                     Order1: id, 
-                    Order2: position
+                    Order2: position,
+                    draggableId: draggable.id
                 }
                 socket.emit('dragend', data);
                 draggable.classList.remove('dragging')

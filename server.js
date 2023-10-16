@@ -25,31 +25,6 @@ function newConnection(socket){
     console.log('New connection: ' + socket.id);
     socket.emit('connection', tasks);
 
-    socket.on('dragend', changeOrder);
-    function changeOrder(data) {
-        console.log(data);
-        console.log(tasks);
-        if (data.Order1 !== 0 || data.Order2 !== 0) {
-            tasks.sort((a, b) => a.Order - b.Order);
-        
-            if (data.Order1 <= data.Order2) {
-                for (let i = data.Order2; i > data.Order1; i--) {
-                    tasks[i].Order = i;
-                }
-                tasks[data.Order1].Order = data.Order2 + 1;
-            } else {
-                tasks[data.Order1].Order = data.Order2 + 1;
-                for (let i = data.Order2; i < data.Order1; i++) {
-                    tasks[i].Order = i + 2;
-                }
-            }
-            console.log(tasks);
-            io.sockets.emit('update', tasks);
-            // socket.broadcast.emit('dragend', tasks);
-        }
-        
-    }
-
     socket.on('createTask', createTask);
     function createTask(data) {
         console.log('Add task');
@@ -71,9 +46,9 @@ function newConnection(socket){
 
         if (index !== -1) {
             tasks[index] = data;
+            io.sockets.emit('update', tasks);
 
         }
-        io.sockets.emit('update', tasks);
     }
 
     socket.on('delete', deleteTask);
@@ -93,4 +68,40 @@ function newConnection(socket){
         io.sockets.emit('update', tasks);
     }
     
+    socket.on('dragstart', dragstart);
+    function dragstart(data){
+        socket.broadcast.emit('dragstart', data);
+        console.log('dragstart');
+    }
+
+    socket.on('dragover', dragover);
+    function dragover(data){
+        socket.broadcast.emit('dragover', data);
+        console.log('dragover');
+        console.log(data);
+    }
+
+    socket.on('dragend', changeOrder);
+    function changeOrder(data) {
+        console.log('dragend');
+        socket.broadcast.emit('dragend', {draggableId: data.draggableId});
+        
+        if (data.Order1 !== 0 || data.Order2 !== 0) {
+            tasks.sort((a, b) => a.Order - b.Order);
+        
+            if (data.Order1 <= data.Order2) {
+                for (let i = data.Order2; i > data.Order1; i--) {
+                    tasks[i].Order = i;
+                }
+                tasks[data.Order1].Order = data.Order2 + 1;
+            } else {
+                tasks[data.Order1].Order = data.Order2 + 1;
+                for (let i = data.Order2; i < data.Order1; i++) {
+                    tasks[i].Order = i + 2;
+                }
+            }
+            io.sockets.emit('update', tasks);
+        }
+        
+    }
 }
